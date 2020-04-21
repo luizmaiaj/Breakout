@@ -74,10 +74,11 @@ function Brick:init(x, y)
 
     -- give it an acceleration of anywhere between X1,Y1 and X2,Y2 (0, 0) and (80, 80) here
     -- gives generally downward 
-    self.psystem:setLinearAcceleration(-15, 0, 15, 80)
+    -- just make explode in all directions
+    self.psystem:setLinearAcceleration(-80, -80, 80, 80)
 
     -- spread of particles; normal looks more natural than uniform
-    self.psystem:setEmissionArea('normal', 10, 10)
+    self.psystem:setEmissionArea('normal', 10, 10) -- normal means normal distribution like a gaussian
 end
 
 --[[

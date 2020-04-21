@@ -52,7 +52,8 @@ function love.load()
 
     -- load up the graphics we'll be using throughout our states
     gTextures = {
-        ['background'] = love.graphics.newImage('graphics/background.png'),
+        ['background'] = love.graphics.newImage('graphics/bg-purple.png'),
+        ['bg-bluefire'] = love.graphics.newImage('graphics/bg-bluefire.png'),
         ['main'] = love.graphics.newImage('graphics/breakout.png'),
         ['arrows'] = love.graphics.newImage('graphics/arrows.png'),
         ['hearts'] = love.graphics.newImage('graphics/hearts.png'),
@@ -202,7 +203,12 @@ function love.draw()
         0,
         -- scale factors on X and Y axis so it fills the screen
         VIRTUAL_WIDTH / (backgroundWidth - 1), VIRTUAL_HEIGHT / (backgroundHeight - 1))
-    
+
+    -- add a cool overlay on the background
+    love.graphics.draw(gTextures['bg-bluefire'], 0, 0, 0,
+        VIRTUAL_WIDTH / (gTextures['bg-bluefire']:getWidth() - 1),
+        VIRTUAL_HEIGHT / (gTextures['bg-bluefire']:getHeight() - 1))
+
     -- use the state machine to defer rendering to the current state we're in
     gStateMachine:render()
     
