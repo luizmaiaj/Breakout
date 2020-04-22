@@ -9,36 +9,15 @@ Particles = Class{}
 -- some of the colors in our palette (to be used with particle systems)
 paletteColors = {
     -- blue
-    [1] = {
-        ['r'] = 99,
-        ['g'] = 155,
-        ['b'] = 255
-    },
+    [1] = { ['r'] = 99, ['g'] = 155, ['b'] = 255 },
     -- green
-    [2] = {
-        ['r'] = 106,
-        ['g'] = 190,
-        ['b'] = 47
-    },
+    [2] = { ['r'] = 106, ['g'] = 190, ['b'] = 47 },
     -- red
-    [3] = {
-        ['r'] = 217,
-        ['g'] = 87,
-        ['b'] = 99
-    },
+    [3] = { ['r'] = 217, ['g'] = 87, ['b'] = 99 },
     -- purple
-    [4] = {
-        ['r'] = 215,
-        ['g'] = 123,
-        ['b'] = 186
-    },
+    [4] = { ['r'] = 215, ['g'] = 123, ['b'] = 186 },
     -- gold
-    [5] = {
-        ['r'] = 251,
-        ['g'] = 242,
-        ['b'] = 54
-    }
-}
+    [5] = { ['r'] = 251, ['g'] = 242, ['b'] = 54 } }
 
 function Particles:initParticles()
     -- particle system belonging to the brick, emitted on hit

@@ -30,6 +30,15 @@ function Ball:init(skin)
     self.skin = skin
 
     self.active = false
+
+    self.godmode = false
+
+    -- particles for god mode
+    self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 2)
+    self.psystem:setParticleLifetime(0.5)
+    self.psystem:setEmissionArea('normal', 1, 1)
+
+    self.psystem:setColors( 251, 242, 54, 255, 251, 242, 54, 0 )
 end
 
 --[[
@@ -119,6 +128,20 @@ function Ball:reset(paddle, where)
     self.active = true
 
     self.skin = math.random(7)
+
+    self.godmode = false
+end
+
+function Ball:setGodMode()
+    self.godmode = not self.godmode
+
+    if self.godmode then
+        self.dx = 3 * self.dx
+        self.dy = 3 * self.dy
+    else
+        self.dx = self.dx / 3
+        self.dy = self.dy / 3
+    end
 end
 
 function Ball:update(dt)
@@ -150,8 +173,15 @@ function Ball:update(dt)
     end
 
     if self.y >= VIRTUAL_HEIGHT - self.height then
-        self.active = false
+        if self.godmode then
+            self.dy = -self.dy
+            gSounds['wall-hit']:play()
+        else
+            self.active = false
+        end
     end
+
+    self.psystem:update(dt)
 end
 
 function Ball:render()
@@ -162,6 +192,11 @@ function Ball:render()
 
     -- gTexture is our global texture for all blocks
     -- gBallFrames is a table of quads mapping to each individual ball skin in the texture
-    love.graphics.draw(gTextures['main'], gFrames['balls'][self.skin],
-        self.x, self.y)
+    love.graphics.draw(gTextures['main'], gFrames['balls'][self.skin], self.x, self.y)
 end
+
+function Ball:draw()
+    self.psystem:emit(2)
+    love.graphics.draw(self.psystem, self.x + (self.width/2), self.y+ (self.height/2))
+end
+

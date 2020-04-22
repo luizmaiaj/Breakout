@@ -35,6 +35,7 @@ function PlayState:enter(params)
     -- power up related
     self.counter = 0 -- time counter for power up
     self.expire = math.random(POWERUP_TIMER_MIN, POWERUP_TIMER_MAX)
+    self.godballexpire = 0
 
     -- add extra balls
     self.balls = {}
@@ -56,11 +57,22 @@ function PlayState:update(dt)
     end
 
     self.counter = self.counter + dt
-
     if self.counter >= self.expire then
         self.powerup:reset()
         self.counter = 0
         self.expire = math.random(POWERUP_TIMER_MIN, POWERUP_TIMER_MAX)
+    end
+
+    if self.godballexpire > 0 then
+        self.godballexpire = self.godballexpire - dt
+
+        if self.godballexpire <= 0 then
+            for k, ball in pairs(self.balls) do
+                if ball.active and ball.godmode then
+                    ball:setGodMode()
+                end
+            end
+        end
     end
 
     -- update positions based on velocity
@@ -106,10 +118,10 @@ function PlayState:render()
     end
 
     self.powerup:render()
-    self.powerup:renderParticles()
 
     renderScore(self.score)
     renderHealth(self.health)
+    self:renderMode()
 
     -- pause text, if paused
     if self.paused then
@@ -128,28 +140,77 @@ function PlayState:checkVictory()
     return true
 end
 
+-- manage powerups
 function PlayState:powerupCollides()
-    -- if the power up is collected then add two more balls
-    -- reuse the balls already created
     if self.powerup:collides(self.paddle) then
-        for i = 0, 1 do
-            local newball
 
+        if self.powerup.skin == 1 then -- power up that reduces pad size
+            self.paddle:increase()
+        elseif self.powerup.skin == 2 then -- power up that increases pad size
+            self.paddle:reduce()
+        elseif self.powerup.skin == 3 then -- power up that adds one health point
+            self:increaseHealth()
+        elseif self.powerup.skin == 4 then -- power up that subtracts one health point
+            self:decreaseHealth()
+        elseif self.powerup.skin == 5 then -- power up that increases speed of all balls
             for k, ball in pairs(self.balls) do
-                if ball.active == false then
-                    newball = ball
-                    break
+                ball.dx = ball.dx * 1.2
+                ball.dy = ball.dy * 1.2
+            end
+        elseif self.powerup.skin == 6 then -- power up that reduces the speed of all balls
+            for k, ball in pairs(self.balls) do
+                ball.dx = ball.dx * .8
+                ball.dy = ball.dy * .8
+            end
+        elseif self.powerup.skin == 7 then -- power up that removes two balls
+            local found = 0
+            local removed = 0
+            for k, ball in pairs(self.balls) do
+                if ball.active then
+                    foundOne = foundOne + 1
+                end
+
+                if foundOne > 1 and ball.active then
+                    ball.active = false
+                    removed = removed + 1
+
+                    if removed == 2 then
+                        break
+                    end
                 end
             end
+        elseif self.powerup.skin == 8 then -- power up that adds two balls
+            for i = 0, 1 do
+                local newball
 
-            if newball == nill then
-                newball = Ball()
-                table.insert(self.balls, newball)
+                -- reuse the balls already created
+                for k, ball in pairs(self.balls) do
+                    if ball.active == false then
+                        newball = ball
+                        break
+                    end
+                end
+
+                if newball == nill then
+                    newball = Ball()
+                    table.insert(self.balls, newball)
+                end
+
+                newball:reset(self.paddle, i == 0 and 'left' or 'right')
             end
+        elseif self.powerup.skin == 9 then -- power up that accelerates one ball and makes it bounce below the paddle for 5 seconds
+            for k, ball in pairs(self.balls) do
+                if ball.active then
+                    ball:setGodMode()
+                    if ball.godmode then
+                        self.godballexpire = GODBALLTIMER
+                    end
+                end
+            end
+        elseif self.powerup.skin == 10 then -- power up that unlocks the key brick
 
-            newball:reset(self.paddle, i == 0 and 'left' or 'right')
         end
-        
+
         gSounds['paddle-hit']:play()
     end
 end
@@ -206,14 +267,13 @@ function PlayState:ballsCollides()
 
                     -- if we have enough points, recover a point of health
                     if self.score > self.recoverPoints then
-                        -- can't go above 3 health
-                        self.health = math.min(3, self.health + 1)
+                        self.paddle:increase() -- increase paddle size as a bonus
 
-                        -- multiply recover points by 2
-                        self.recoverPoints = math.min(100000, self.recoverPoints * 2)
+                        self:increaseHealth()
+                        
+                        self.recoverPoints = math.min(100000, self.recoverPoints * 2) -- multiply recover points by 2
 
-                        -- play recover sound effect
-                        gSounds['recover']:play()
+                        gSounds['recover']:play() -- play recover sound effect
                     end
 
                     -- go to our victory screen if there are no more bricks left
@@ -259,8 +319,11 @@ function PlayState:noMoreBalls()
 
     -- if ball goes below bounds, revert to serve state and decrease health
     if nomoreballs then
-        self.health = self.health - 1
+        self:decreaseHealth()
+
         gSounds['hurt']:play()
+
+        self.paddle:setSize(self.paddle.size - 1) -- shrink the paddle
 
         if self.health == 0 then
             gStateMachine:change('game-over', {score = self.score, highScores = self.highScores })
@@ -274,6 +337,31 @@ function PlayState:noMoreBalls()
                 level = self.level,
                 recoverPoints = self.recoverPoints
             })
+        end
+    end
+end
+
+function PlayState:increaseHealth()
+    self.health = math.min(3, self.health + 1) -- can't go above 3 health
+end
+
+function PlayState:decreaseHealth()
+    self.health = self.health - 1
+end
+
+--[[
+    Simply renders the player's score at the top right, with left-side padding
+    for the score number.
+]]
+function PlayState:renderMode()
+    if self.godballexpire > 0 then
+        love.graphics.setFont(gFonts['small'])
+        love.graphics.print('God Mode: ' .. tostring(math.floor(self.godballexpire)), VIRTUAL_WIDTH - 200, 5)
+
+        for k, ball in pairs(self.balls) do
+            if ball.active and ball.godmode then
+                ball:draw() -- draw particles behind the ball in god mode
+            end
         end
     end
 end

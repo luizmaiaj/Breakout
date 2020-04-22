@@ -7,7 +7,7 @@
     To manage the powerups that will be generated during the course of the game
 ]]
 
-Powerup = Class{__includes = Particles}
+Powerup = Class{}
 
 function Powerup:init()
     -- static size
@@ -20,8 +20,6 @@ function Powerup:init()
 
     self.x = math.random(1, VIRTUAL_WIDTH - self.width)
     self.y = VIRTUAL_HEIGHT / 2 -- simplify so always at the center
-
-    -- self:initParticles()
 end
 
 function Powerup:collides(target)
@@ -67,9 +65,7 @@ function Powerup:reset()
     self.dy = math.random(10, 50)
     self.dx = math.random(-50, 50)
 
-    -- self:hitParticles(math.random(0, 5), math.random(0, 255), self.x + (self.width/2), self.y + (self.height/2))
-
-    self.skin = 1 -- later to be randomized or managed in antoher way
+    self.skin = math.random(1, 10)
 
     self.active = true
 end
@@ -100,16 +96,10 @@ function Powerup:update(dt)
         self.dy = -self.dy
         gSounds['wall-hit']:play()
     end
-
-    -- self:updateParticle()
 end
 
 function Powerup:render()
     if self.active then
         love.graphics.draw(gTextures['main'], gFrames['powerups'][self.skin], self.x, self.y)
     end
-end
-
-function Powerup:renderParticles()
-    -- self:draw()
 end
