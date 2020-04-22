@@ -18,6 +18,9 @@ function Powerup:init()
 
     self.skin = 1
 
+    self.x = math.random(1, VIRTUAL_WIDTH - self.width)
+    self.y = VIRTUAL_HEIGHT / 2 -- simplify so always at the center
+
     -- self:initParticles()
 end
 
@@ -43,6 +46,14 @@ function Powerup:collides(target)
 
     -- if the above aren't true, they're overlapping
     return true
+end
+
+function Powerup:hit()
+    self.skin = self.skin + 1
+
+    if self.skin > 10 then
+        self.skin = 1
+    end
 end
 
 --[[

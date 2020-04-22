@@ -39,7 +39,7 @@ end
 function Ball:collides(target)
 
     if self.active == false then
-        return
+        return false
     end
 
     -- first, check to see if the left edge of either is farther to the right
@@ -58,14 +58,62 @@ function Ball:collides(target)
     return true
 end
 
+--
+-- collision code for bricks
+--
+-- we check to see if the opposite side of our velocity is outside of the brick;
+-- if it is, we trigger a collision on that side. else we're within the X + width of
+-- the brick and should check to see if the top or bottom edge is outside of the brick,
+-- colliding on the top or bottom accordingly 
+--
+-- flips the ball direction depending on how the target was hit
+function Ball:flip(target)
+    -- left edge; only check if we're moving right, and offset the check by a couple of pixels
+    -- so that flush corner hits register as Y flips, not X flips
+    if self.x + 2 < target.x and self.dx > 0 then
+        
+        -- flip x velocity and reset position outside of brick
+        self.dx = -self.dx
+        self.x = target.x - 8
+    
+    -- right edge; only check if we're moving left, , and offset the check by a couple of pixels
+    -- so that flush corner hits register as Y flips, not X flips
+    elseif self.x + 6 > target.x + target.width and self.dx < 0 then
+        
+        -- flip x velocity and reset position outside of brick
+        self.dx = -self.dx
+        self.x = target.x + target.width
+    
+    -- top edge if no X collisions, always check
+    elseif self.y < target.y then
+        
+        -- flip y velocity and reset position outside of brick
+        self.dy = -self.dy
+        self.y = target.y - self.height
+    
+    -- bottom edge if no X collisions or top collision, last possibility
+    else
+        -- flip y velocity and reset position outside of brick
+        self.dy = -self.dy
+        self.y = target.y + target.height
+    end
+end
+
 --[[
     Places the ball in the middle of the screen, with no movement.
 ]]
-function Ball:reset(paddle)
+function Ball:reset(paddle, where)
     self.dx = math.random(-200, 200)
     self.dy = math.random(-50, -60)
 
-    self.x = paddle.x + (paddle.width / 2) - (self.width / 2)
+    if where == 'left' then
+        self.x = paddle.x - (self.width / 2)
+    elseif where == 'right' then
+        self.x = paddle.x + paddle.width - (self.width / 2)
+    else
+        self.x = paddle.x + (paddle.width / 2) - (self.width / 2)
+    end
+
     self.y = paddle.y - self.height
 
     self.active = true

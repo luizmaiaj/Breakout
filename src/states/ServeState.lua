@@ -28,7 +28,7 @@ function ServeState:enter(params)
 
     -- init new ball (random color for fun)
     self.ball = Ball()
-    self.ball:reset(self.paddle)
+    self.ball:reset(self.paddle, 'center')
 end
 
 function ServeState:update(dt)

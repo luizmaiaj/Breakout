@@ -120,9 +120,7 @@ function love.load()
         ['enter-high-score'] = function() return EnterHighScoreState() end,
         ['paddle-select'] = function() return PaddleSelectState() end
     }
-    gStateMachine:change('start', {
-        highScores = loadHighScores()
-    })
+    gStateMachine:change('start', { highScores = loadHighScores() })
 
     -- play our music outside of all states and set it to looping
     gSounds['music']:play()
