@@ -112,6 +112,11 @@ function LevelMaker.createMap(level)
                 b.tier = solidTier
             end 
 
+            if math.random(1, 10) == 5 then -- one chance in one hundred
+                b.color = 6
+                b.tier = 3
+            end
+
             table.insert(bricks, b)
 
             -- Lua's version of the 'continue' statement

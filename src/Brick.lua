@@ -36,12 +36,21 @@ end
     Triggers a hit on the brick, taking it out of play if at 0 health or
     changing its color otherwise.
 ]]
-function Brick:hit()
+function Brick:hit(keyfound)
     self:hitParticles(self.tier, self.color)
 
     -- sound on hit
     gSounds['brick-hit-2']:stop()
     gSounds['brick-hit-2']:play()
+
+    if self.color == 6 and self.tier == 3 then
+        if keyfound then
+            self.color = 6
+            self.tier = 0
+        end
+
+        return
+    end
 
     -- if we're at a higher tier than the base, we need to go down a tier
     -- if we're already at the lowest color, else just go down a color

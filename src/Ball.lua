@@ -38,7 +38,7 @@ function Ball:init(skin)
     self.psystem:setParticleLifetime(0.5)
     self.psystem:setEmissionArea('normal', 1, 1)
 
-    self.psystem:setColors( 251, 242, 54, 255, 251, 242, 54, 0 )
+    self.psystem:setColors( 251/255, 242/255, 54/255, 255/255, 251/255, 242/255, 54/255, 0/255 )
 end
 
 --[[

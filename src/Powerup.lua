@@ -78,7 +78,7 @@ function Powerup:update(dt)
     self.x = self.x + self.dx * dt
     self.y = self.y + self.dy * dt
 
-    -- allow ball to bounce off walls
+    -- allow to bounce off walls
     if self.x <= 0 then
         self.x = 0
         self.dx = -self.dx
@@ -91,8 +91,8 @@ function Powerup:update(dt)
         gSounds['wall-hit']:play()
     end
    
-    if self.y <= 0 then
-        self.y = 0
+    if self.y > (VIRTUAL_HEIGHT + (self.height / 2)) then
+        self.active = false
         self.dy = -self.dy
         gSounds['wall-hit']:play()
     end
@@ -101,5 +101,35 @@ end
 function Powerup:render()
     if self.active then
         love.graphics.draw(gTextures['main'], gFrames['powerups'][self.skin], self.x, self.y)
+        self:renderDescription()
     end
+end
+
+function Powerup:renderDescription()
+    local description = 'Power-up: '
+
+    if self.skin == 1 then -- power up that reduces pad size
+        description = description .. 'reduce paddle'
+    elseif self.skin == 2 then -- power up that increases pad size
+        description = description .. 'increase paddle'
+    elseif self.skin == 3 then -- power up that adds one health point
+        description = description .. 'gain one health'
+    elseif self.skin == 4 then -- power up that subtracts one health point
+        description = description .. 'lose one health'
+    elseif self.skin == 5 then -- power up that increases speed of all balls
+        description = description .. 'accelerate balls'
+    elseif self.skin == 6 then -- power up that reduces the speed of all balls
+        description = description .. 'decelerate balls'
+    elseif self.skin == 7 then -- power up that removes two balls
+        description = description .. 'removes two balls'
+    elseif self.skin == 8 then -- power up that adds two balls
+        description = description .. 'adds two balls'
+    elseif self.skin == 9 then -- power up that accelerates one ball and makes it bounce below the paddle for 5 seconds
+        description = description .. 'god mode'
+    elseif self.skin == 10 then -- power up that unlocks the key brick
+        description = description .. 'unlocks key brick'
+    end
+
+    love.graphics.setFont(gFonts['small'])
+    love.graphics.print(description, 100, 5)
 end

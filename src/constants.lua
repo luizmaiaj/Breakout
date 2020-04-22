@@ -22,8 +22,8 @@ VIRTUAL_HEIGHT = 243
 PADDLE_SPEED = 200
 
 -- seconds between power up spawns
-POWERUP_TIMER_MIN = 10
-POWERUP_TIMER_MAX = 11
+POWERUP_TIMER_MIN = 7
+POWERUP_TIMER_MAX = 10
 
 -- time that a ball remains in god mode
 GODBALLTIMER = 10

@@ -40,6 +40,9 @@ function PlayState:enter(params)
     -- add extra balls
     self.balls = {}
     table.insert(self.balls, params.ball)
+
+    -- to know if the key power up was already found
+    self.keyfound = false
 end
 
 function PlayState:update(dt)
@@ -145,32 +148,39 @@ function PlayState:powerupCollides()
     if self.powerup:collides(self.paddle) then
 
         if self.powerup.skin == 1 then -- power up that reduces pad size
-            self.paddle:increase()
-        elseif self.powerup.skin == 2 then -- power up that increases pad size
             self.paddle:reduce()
+            print('reduce paddle')
+        elseif self.powerup.skin == 2 then -- power up that increases pad size
+            self.paddle:increase()
+            print('increase paddle')
         elseif self.powerup.skin == 3 then -- power up that adds one health point
             self:increaseHealth()
+            print('gain one health')
         elseif self.powerup.skin == 4 then -- power up that subtracts one health point
             self:decreaseHealth()
+            print('lose one health')
         elseif self.powerup.skin == 5 then -- power up that increases speed of all balls
+            print('accelerate all balls')
             for k, ball in pairs(self.balls) do
                 ball.dx = ball.dx * 1.2
                 ball.dy = ball.dy * 1.2
             end
         elseif self.powerup.skin == 6 then -- power up that reduces the speed of all balls
+            print('decelerate all balls')
             for k, ball in pairs(self.balls) do
                 ball.dx = ball.dx * .8
                 ball.dy = ball.dy * .8
             end
         elseif self.powerup.skin == 7 then -- power up that removes two balls
+            print('removes two balls')
             local found = 0
             local removed = 0
             for k, ball in pairs(self.balls) do
                 if ball.active then
-                    foundOne = foundOne + 1
+                    found = found + 1
                 end
 
-                if foundOne > 1 and ball.active then
+                if found > 1 and ball.active then
                     ball.active = false
                     removed = removed + 1
 
@@ -180,6 +190,7 @@ function PlayState:powerupCollides()
                 end
             end
         elseif self.powerup.skin == 8 then -- power up that adds two balls
+            print('adds two balls')
             for i = 0, 1 do
                 local newball
 
@@ -199,6 +210,7 @@ function PlayState:powerupCollides()
                 newball:reset(self.paddle, i == 0 and 'left' or 'right')
             end
         elseif self.powerup.skin == 9 then -- power up that accelerates one ball and makes it bounce below the paddle for 5 seconds
+            print('god mode ball')
             for k, ball in pairs(self.balls) do
                 if ball.active then
                     ball:setGodMode()
@@ -208,7 +220,8 @@ function PlayState:powerupCollides()
                 end
             end
         elseif self.powerup.skin == 10 then -- power up that unlocks the key brick
-
+            print('found key for key brick')
+            self.keyfound = true
         end
 
         gSounds['paddle-hit']:play()
@@ -263,7 +276,8 @@ function PlayState:ballsCollides()
                     self.score = self.score + (brick.tier * 200 + brick.color * 25)
 
                     -- trigger the brick's hit function, which removes it from play
-                    brick:hit()
+                    -- the key brick can be open if key was found or the ball is in god mode
+                    brick:hit(self.keyfound or ball.godmode)
 
                     -- if we have enough points, recover a point of health
                     if self.score > self.recoverPoints then
