@@ -14,41 +14,7 @@
     layout of bricks.
 ]]
 
-Brick = Class{}
-
--- some of the colors in our palette (to be used with particle systems)
-paletteColors = {
-    -- blue
-    [1] = {
-        ['r'] = 99,
-        ['g'] = 155,
-        ['b'] = 255
-    },
-    -- green
-    [2] = {
-        ['r'] = 106,
-        ['g'] = 190,
-        ['b'] = 47
-    },
-    -- red
-    [3] = {
-        ['r'] = 217,
-        ['g'] = 87,
-        ['b'] = 99
-    },
-    -- purple
-    [4] = {
-        ['r'] = 215,
-        ['g'] = 123,
-        ['b'] = 186
-    },
-    -- gold
-    [5] = {
-        ['r'] = 251,
-        ['g'] = 242,
-        ['b'] = 54
-    }
-}
+Brick = Class{__includes = Particles}
 
 function Brick:init(x, y)
     -- used for coloring and score calculation
@@ -63,22 +29,7 @@ function Brick:init(x, y)
     -- used to determine whether this brick should be rendered
     self.inPlay = true
 
-    -- particle system belonging to the brick, emitted on hit
-    self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 64)
-
-    -- various behavior-determining functions for the particle system
-    -- https://love2d.org/wiki/ParticleSystem
-
-    -- lasts between 0.5-1 seconds seconds
-    self.psystem:setParticleLifetime(0.5, 1)
-
-    -- give it an acceleration of anywhere between X1,Y1 and X2,Y2 (0, 0) and (80, 80) here
-    -- gives generally downward 
-    -- just make explode in all directions
-    self.psystem:setLinearAcceleration(-80, -80, 80, 80)
-
-    -- spread of particles; normal looks more natural than uniform
-    self.psystem:setEmissionArea('normal', 10, 10) -- normal means normal distribution like a gaussian
+    self:initParticles()
 end
 
 --[[
@@ -86,20 +37,7 @@ end
     changing its color otherwise.
 ]]
 function Brick:hit()
-    -- set the particle system to interpolate between two colors; in this case, we give
-    -- it our self.color but with varying alpha; brighter for higher tiers, fading to 0
-    -- over the particle's lifetime (the second color)
-    self.psystem:setColors(
-        paletteColors[self.color].r,
-        paletteColors[self.color].g,
-        paletteColors[self.color].b,
-        55 * (self.tier + 1),
-        paletteColors[self.color].r,
-        paletteColors[self.color].g,
-        paletteColors[self.color].b,
-        0
-    )
-    self.psystem:emit(64)
+    self:hitParticles(self.tier, self.color)
 
     -- sound on hit
     gSounds['brick-hit-2']:stop()
@@ -131,7 +69,7 @@ function Brick:hit()
 end
 
 function Brick:update(dt)
-    self.psystem:update(dt)
+    self:updateParticles(dt)
 end
 
 function Brick:render()
@@ -139,8 +77,7 @@ function Brick:render()
         love.graphics.draw(gTextures['main'], 
             -- multiply color by 4 (-1) to get our color offset, then add tier to that
             -- to draw the correct tier and color brick onto the screen
-            gFrames['bricks'][1 + ((self.color - 1) * 4) + self.tier],
-            self.x, self.y)
+            gFrames['bricks'][1 + ((self.color - 1) * 4) + self.tier], self.x, self.y)
     end
 end
 
@@ -149,5 +86,5 @@ end
     otherwise, some bricks would render over other bricks' particle systems.
 ]]
 function Brick:renderParticles()
-    love.graphics.draw(self.psystem, self.x + 16, self.y + 8)
+    self:draw()
 end

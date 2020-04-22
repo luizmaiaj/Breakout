@@ -18,6 +18,12 @@ require 'src/constants'
 -- the ball that travels around, breaking bricks and triggering lives lost
 require 'src/Ball'
 
+-- the powerups
+require 'src/Powerup'
+
+-- the particles class
+require 'src/Particles'
+
 -- the entities in our game map that give us points when we collide with them
 require 'src/Brick'
 

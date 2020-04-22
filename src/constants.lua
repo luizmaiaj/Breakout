@@ -20,3 +20,7 @@ VIRTUAL_HEIGHT = 243
 
 -- paddle movement speed
 PADDLE_SPEED = 200
+
+-- seconds between power up spawns
+POWERUP_TIMER_MIN = 15
+POWERUP_TIMER_MAX = 30
